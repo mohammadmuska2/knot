@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build:skip-bindings": "vite build && node -e \"require('fs').copyFileSync('env.json','dist/env.json')\"",
-    "build": "vite build && node -e \"require('fs').copyFileSync('env.json','dist/env.json')\"",
-    "copy:env": "node -e \"require('fs').copyFileSync('env.json','dist/env.json')\"",
+    "build:skip-bindings": "vite build && node copy-env.js",
+    "build": "vite build && node copy-env.js",
+    "copy:env": "node copy-env.js",
     "typecheck": "tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/tsconfig.tsbuildinfo --pretty",
     "check": "biome check src",
     "fix": "biome check --write src"

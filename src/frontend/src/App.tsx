@@ -26,7 +26,7 @@ import { getAuthUser } from "./utils/auth";
 
 function AppInitializer() {
   // Silent database resets are fully disabled to guarantee permanent persistence of registrations and profiles.
-  // Standard Railpack deployment trigger v3!
+  // Standard Railpack deployment trigger v4!
   return null;
 }
 
