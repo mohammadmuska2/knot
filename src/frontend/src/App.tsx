@@ -41,13 +41,19 @@ function RootLayout() {
 }
 
 function MainLayout() {
+  const user = getAuthUser();
+  const isWorker = user?.role === "worker";
+  // If the worker is approved, cert status in localStorage will be "approved"
+  const isApproved = isWorker ? localStorage.getItem(`knot_cert_status_${user.id}`) === "approved" : true;
+  const hideLayout = isWorker && !isApproved;
+
   return (
     <>
-      <Navbar />
+      {!hideLayout && <Navbar />}
       <div className="flex-1 flex flex-col animate-page-shift">
         <Outlet />
       </div>
-      <Footer />
+      {!hideLayout && <Footer />}
     </>
   );
 }
