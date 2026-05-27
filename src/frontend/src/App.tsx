@@ -26,6 +26,7 @@ import { getAuthUser } from "./utils/auth";
 
 function AppInitializer() {
   // Silent database resets are fully disabled to guarantee permanent persistence of registrations and profiles.
+  // Ready for Railway deployment!
   return null;
 }
 
