@@ -1,0 +1,336 @@
+import { useLang } from "../contexts/LanguageContext";
+import { ExternalLink, X } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useRef, useState } from "react";
+
+// ── Propeller Ads Configuration ───────────────────────────────────────────────
+//
+// HOW TO EARN REAL REVENUE WITH PROPELLER ADS (works on subdomains like icp0.io!):
+//
+// STEP 1: Sign up at https://publishers.propellerads.com
+// STEP 2: Add your site — it WORKS on icp0.io subdomains (no custom domain required)
+// STEP 3: Create an ad zone → get your Zone ID (a number like "4887601")
+// STEP 4: Replace PROPELLER_ZONE_ID below with your actual Zone ID
+// STEP 5: Set PROPELLER_ADS_ENABLED = true
+//
+// Propeller Ads supports: Display banners, native ads, push notifications, pop-under
+// No top-level domain approval required. Subdomain-friendly.
+//
+const PROPELLER_ADS_ENABLED = import.meta.env.VITE_PROPELLER_ADS_ENABLED === "true";
+const PROPELLER_ZONE_ID = import.meta.env.VITE_PROPELLER_ZONE_ID || "";
+
+// ── Fallback / Placeholder Ads (shown when Propeller Ads is not configured) ───
+
+interface FallbackAd {
+  id: string;
+  title: string;
+  description: string;
+  cta: string;
+  url: string;
+  emoji: string;
+  bgGradient: string;
+  accentColor: string;
+  textColor: string;
+  tag: string;
+}
+
+const FALLBACK_ADS: FallbackAd[] = [
+  {
+    id: "ad_tools",
+    title: "Pro Tools for Craftsmen",
+    description:
+      "Drills, saws, hammers & more — factory prices delivered to your door. Used by 50,000+ skilled workers.",
+    cta: "Shop Tools →",
+    url: "https://www.amazon.in/tools",
+    emoji: "🔨",
+    bgGradient: "linear-gradient(135deg, #1a3a5c 0%, #0f2035 100%)",
+    accentColor: "#f59e0b",
+    textColor: "#ffffff",
+    tag: "Sponsored",
+  },
+  {
+    id: "ad_training",
+    title: "Free Skill Certification Videos",
+    description: "Master advanced techniques. 200+ hours of free vocational training content from India's top craftsmen.",
+    cta: "Start Learning Free →",
+    url: "#",
+    emoji: "🎓",
+    bgGradient: "linear-gradient(135deg, #134e1e 0%, #052e0f 100%)",
+    accentColor: "#4ade80",
+    textColor: "#ffffff",
+    tag: "Sponsored",
+  },
+  {
+    id: "ad_insurance",
+    title: "Worker Income Protection",
+    description:
+      "Special insurance plans for carpenters, tailors, plumbers & more. Low monthly premiums across India.",
+    cta: "Get Covered Today →",
+    url: "#",
+    emoji: "🛡️",
+    bgGradient: "linear-gradient(135deg, #3b1278 0%, #1e0850 100%)",
+    accentColor: "#c084fc",
+    textColor: "#ffffff",
+    tag: "Sponsored",
+  },
+  {
+    id: "ad_materials",
+    title: "Raw Materials at Wholesale",
+    description:
+      "Wood, fabric, pipes, paint & more at factory prices. Free delivery on orders above ₹500.",
+    cta: "Order Now →",
+    url: "#",
+    emoji: "🏭",
+    bgGradient: "linear-gradient(135deg, #7c2000 0%, #3d0f00 100%)",
+    accentColor: "#fb923c",
+    textColor: "#ffffff",
+    tag: "Sponsored",
+  },
+  {
+    id: "ad_loan",
+    title: "Business Loan for Workers",
+    description:
+      "Grow your craft business. Get up to ₹5 lakhs with minimal documentation. Quick approval.",
+    cta: "Apply for Loan →",
+    url: "#",
+    emoji: "💰",
+    bgGradient: "linear-gradient(135deg, #1a4a2e 0%, #0b2416 100%)",
+    accentColor: "#34d399",
+    textColor: "#ffffff",
+    tag: "Sponsored",
+  },
+];
+
+// Inject Propeller Ads script once
+let propellerScriptInjected = false;
+function injectPropellerAds() {
+  if (!PROPELLER_ADS_ENABLED) return;
+  if (propellerScriptInjected) return;
+  if (typeof document === "undefined") return;
+  propellerScriptInjected = true;
+  const s = document.createElement("script");
+  s.type = "text/javascript";
+  s.async = true;
+  s.src = `//cdn.propellerads.com/zones/${PROPELLER_ZONE_ID}.js?t=${Math.floor(Math.random() * 100000)}`;
+  s.setAttribute("data-zone", PROPELLER_ZONE_ID);
+  (document.body || document.documentElement).appendChild(s);
+}
+
+// ── Banner Ad (inline in feed / assessment) ───────────────────────────────────
+
+export function BannerAd({ className = "" }: { className?: string }) {
+  const { t } = useLang();
+  const propellerContainerRef = useRef<HTMLDivElement>(null);
+  const [adIndex] = useState(() =>
+    Math.floor(Math.random() * FALLBACK_ADS.length),
+  );
+  const baseAd = FALLBACK_ADS[adIndex];
+  const ad = {
+    ...baseAd,
+    title: baseAd.id === "ad_training" ? t("ad_title") : (baseAd.id === "ad_materials" ? t("ad_materials_title") : (baseAd.id === "ad_tools" ? t("ad_tools_title") : (baseAd.id === "ad_insurance" ? t("ad_insurance_title") : (baseAd.id === "ad_loan" ? t("ad_loan_title") : baseAd.title)))),
+    description: baseAd.id === "ad_training" ? t("ad_desc") : (baseAd.id === "ad_materials" ? t("ad_materials_desc") : (baseAd.id === "ad_tools" ? t("ad_tools_desc") : (baseAd.id === "ad_insurance" ? t("ad_insurance_desc") : (baseAd.id === "ad_loan" ? t("ad_loan_desc") : baseAd.description)))),
+    cta: baseAd.id === "ad_training" ? t("ad_btn") : (baseAd.id === "ad_materials" ? t("ad_materials_cta") : (baseAd.id === "ad_tools" ? t("ad_tools_cta") : (baseAd.id === "ad_insurance" ? t("ad_insurance_cta") : (baseAd.id === "ad_loan" ? t("ad_loan_cta") : baseAd.cta)))),
+    tag: t("ad_sponsored")
+  };
+
+  useEffect(() => {
+    injectPropellerAds();
+  }, []);
+
+  return (
+    <div
+      className={`rounded-2xl overflow-hidden shadow-md border border-white/10 ${className}`}
+      data-ocid="banner_ad.card"
+    >
+      {PROPELLER_ADS_ENABLED ? (
+        /* Propeller Ads renders globally — this is a container placeholder */
+        <div
+          ref={propellerContainerRef}
+          className="min-h-[90px] bg-gray-50 flex items-center justify-center"
+        >
+          <p className="text-gray-400 text-xs font-body">Advertisement</p>
+        </div>
+      ) : (
+        <a
+          href={ad.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.preventDefault()}
+          className="block no-underline"
+          data-ocid="banner_ad.link"
+        >
+          <div
+            className="px-5 py-4 flex items-center gap-4 cursor-pointer group transition-opacity hover:opacity-95"
+            style={{ background: ad.bgGradient }}
+          >
+            <span className="text-4xl select-none drop-shadow-lg">
+              {ad.emoji}
+            </span>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <span
+                  className="text-[9px] font-bold px-1.5 py-0.5 rounded-sm uppercase tracking-widest"
+                  style={{
+                    background: "rgba(255,255,255,0.12)",
+                    color: ad.accentColor,
+                    border: `1px solid ${ad.accentColor}40`,
+                  }}
+                >
+                  {ad.tag}
+                </span>
+                <p className="font-display font-bold text-white text-sm truncate">
+                  {ad.title}
+                </p>
+              </div>
+              <p className="font-body text-white/65 text-xs leading-snug line-clamp-1">
+                {ad.description}
+              </p>
+            </div>
+            <div
+              className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-body font-bold transition-all group-hover:opacity-90 whitespace-nowrap"
+              style={{ background: ad.accentColor, color: "#000" }}
+              data-ocid="banner_ad.cta_button"
+            >
+              {ad.cta}
+            </div>
+          </div>
+          {/* Demo label — only shown until Propeller Ads is configured */}
+          <div className="px-3 py-1 bg-black/50 text-center">
+            <p className="font-body text-[9px] text-white/40 tracking-wide">
+              {t("ad_demo_banner")}
+            </p>
+          </div>
+        </a>
+      )}
+    </div>
+  );
+}
+
+// ── Popup Ad (bottom-right, appears after 8s) ────────────────────────────────
+
+export function PopupAd() {
+  const { t } = useLang();
+  const [visible, setVisible] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+  const [adIndex] = useState(() => Math.floor(Math.random() * FALLBACK_ADS.length));
+  const baseAd = FALLBACK_ADS[adIndex];
+  const ad = {
+    ...baseAd,
+    title: baseAd.id === "ad_training" ? t("ad_title") : (baseAd.id === "ad_materials" ? t("ad_materials_title") : (baseAd.id === "ad_tools" ? t("ad_tools_title") : (baseAd.id === "ad_insurance" ? t("ad_insurance_title") : (baseAd.id === "ad_loan" ? t("ad_loan_title") : baseAd.title)))),
+    description: baseAd.id === "ad_training" ? t("ad_desc") : (baseAd.id === "ad_materials" ? t("ad_materials_desc") : (baseAd.id === "ad_tools" ? t("ad_tools_desc") : (baseAd.id === "ad_insurance" ? t("ad_insurance_desc") : (baseAd.id === "ad_loan" ? t("ad_loan_desc") : baseAd.description)))),
+    cta: baseAd.id === "ad_training" ? t("ad_btn") : (baseAd.id === "ad_materials" ? t("ad_materials_cta") : (baseAd.id === "ad_tools" ? t("ad_tools_cta") : (baseAd.id === "ad_insurance" ? t("ad_insurance_cta") : (baseAd.id === "ad_loan" ? t("ad_loan_cta") : baseAd.cta)))),
+    tag: t("ad_sponsored")
+  };
+
+  useEffect(() => {
+    injectPropellerAds();
+  }, []);
+
+  // Show after 8 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!dismissed) setVisible(true);
+    }, 8000);
+    return () => clearTimeout(timer);
+  }, [dismissed]);
+
+  // Re-show every 2 minutes
+  useEffect(() => {
+    if (dismissed) {
+      const timer = setTimeout(
+        () => {
+          setDismissed(false);
+        },
+        2 * 60 * 1000,
+      );
+      return () => clearTimeout(timer);
+    }
+  }, [dismissed]);
+
+  function handleDismiss() {
+    setVisible(false);
+    setDismissed(true);
+  }
+
+  return (
+    <AnimatePresence>
+      {visible && (
+        <motion.div
+          key="popup-ad"
+          initial={{ opacity: 0, scale: 0.88, y: 48 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.88, y: 48 }}
+          transition={{ type: "spring", stiffness: 320, damping: 28 }}
+          className="fixed bottom-6 right-6 z-50 w-[320px] rounded-2xl overflow-hidden shadow-2xl"
+          data-ocid="popup_ad.modal"
+        >
+          <div
+            className="rounded-2xl overflow-hidden border border-white/10"
+            style={{ background: ad.bgGradient }}
+          >
+            {/* Header bar */}
+            <div className="flex items-center justify-between px-4 pt-4 pb-2">
+              <span
+                className="text-[9px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-widest"
+                style={{
+                  background: "rgba(255,255,255,0.12)",
+                  color: ad.accentColor,
+                  border: `1px solid ${ad.accentColor}40`,
+                }}
+              >
+                {ad.tag}
+              </span>
+              <button
+                type="button"
+                onClick={handleDismiss}
+                className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                data-ocid="popup_ad.close_button"
+              >
+                <X className="w-3.5 h-3.5 text-white/70" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="px-5 pb-5 flex flex-col items-center text-center gap-3">
+              <span className="text-6xl select-none drop-shadow-xl">
+                {ad.emoji}
+              </span>
+              <div>
+                <h3 className="font-display font-bold text-white text-lg mb-1.5">
+                  {ad.title}
+                </h3>
+                <p className="font-body text-white/65 text-sm leading-relaxed">
+                  {ad.description}
+                </p>
+              </div>
+              <a
+                href={ad.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleDismiss();
+                }}
+                className="w-full py-3 rounded-xl text-sm font-body font-bold text-center transition-all hover:opacity-90 active:scale-95 flex items-center justify-center gap-1.5"
+                style={{ background: ad.accentColor, color: "#000" }}
+                data-ocid="popup_ad.cta_button"
+              >
+                {ad.cta}
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+              <button
+                type="button"
+                onClick={handleDismiss}
+                className="font-body text-xs text-white/35 hover:text-white/55 transition-colors"
+                data-ocid="popup_ad.dismiss_button"
+              >{t("ad_close")}</button>
+              {!PROPELLER_ADS_ENABLED && (
+                <p className="font-body text-[9px] text-white/25 tracking-wide">{t("ad_demo")}</p>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}

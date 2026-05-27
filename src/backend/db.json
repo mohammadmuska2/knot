@@ -1,0 +1,127 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Alice Worker",
+      "location": "Bangalore",
+      "skill": "Plumbing",
+      "trustScore": 0,
+      "endorsementCount": 0,
+      "badgeLevel": "None",
+      "distance": 8,
+      "bio": "Certified commercial plumber with over 5 years of experience in residential leaks, piping, and repairs.",
+      "contact": "9876543210",
+      "videoURL": "data:video/webm;base64,GkXfowEAAAAAAAAfQoaBAUL3gQFC8oEEQvOBCEKChHdlYm1Ch4EEQoWBAhhTgGcBAAAAAAAVkhFNm3RALE27i1OrhBVJqWZTrIHfTbuMU6uEFlSua1OsggEwTbuMU6uEHFO7a1OsghV17AEAAAAAAACk"
+    },
+    {
+      "id": 2,
+      "name": "Bob Carpenter",
+      "location": "New York",
+      "skill": "Carpentry",
+      "trustScore": 4,
+      "endorsementCount": 8,
+      "badgeLevel": "Silver",
+      "distance": 3,
+      "bio": "Artisan woodworker specializing in modular furniture, custom study tables, cabinet fittings, and home decor.",
+      "contact": "8765432109",
+      "videoURL": "data:video/webm;base64,GkXfowEAAAAAAAAfQoaBAUL3gQFC8oEEQvOBCEKChHdlYm1Ch4EEQoWBAhhTgGcBAAAAAAAVkhFNm3RALE27i1OrhBVJqWZTrIHfTbuMU6uEFlSua1OsggEwTbuMU6uEHFO7a1OsghV17AEAAAAAAACk"
+    }
+  ],
+  "citizens": [
+    {
+      "id": 1,
+      "name": "Charlie Citizen",
+      "location": "Bangalore",
+      "address": "123 Green Glen Layout, Bangalore",
+      "trust": 5
+    },
+    {
+      "id": 2,
+      "name": "Daisy Citizen",
+      "location": "New York",
+      "address": "456 Lexington Ave, New York",
+      "trust": 5
+    },
+    {
+      "id": 3,
+      "name": "Abdul",
+      "address": "Kakinada"
+    }
+  ],
+  "learningRequests": [
+    {
+      "id": 1,
+      "requesterId": "Charlie Citizen",
+      "citizenId": 1,
+      "skill": "Plumbing",
+      "message": "Need to learn how to fix a slow-draining kitchen sink and replace a basic rubber washer in a leaky faucet.",
+      "status": "pending",
+      "createdAt": 1779872592065
+    },
+    {
+      "id": 2,
+      "requesterId": "Daisy Citizen",
+      "citizenId": 2,
+      "skill": "Carpentry",
+      "message": "Looking for some basic tutoring on how to build a small wall shelf and safely operate a manual hand saw.",
+      "status": "pending",
+      "createdAt": 1779865392065
+    }
+  ],
+  "certificationResults": [
+    {
+      "workerId": 2,
+      "skill": "Carpentry",
+      "level": "Basic",
+      "passed": true,
+      "issuedDate": 1779793392065,
+      "certificateId": "KNOT-1784918239",
+      "mcqScore": 90,
+      "practicalPassed": true
+    }
+  ],
+  "practicalVideoSubmissions": [
+    {
+      "status": "pending",
+      "workerId": 1,
+      "workerName": "Alice Worker",
+      "skill": "Plumbing",
+      "videoDataURI": "data:video/webm;base64,GkXfowEAAAAAAAAfQoaBAUL3gQFC8oEEQvOBCEKChHdlYm1Ch4EEQoWBAhhTgGcBAAAAAAAVkhFNm3RALE27i1OrhBVJqWZTrIHfTbuMU6uEFlSua1OsggEwTbuMU6uEHFO7a1OsghV17AEAAAAAAACk",
+      "submittedAt": 1779879792065
+    }
+  ],
+  "videoStore": [],
+  "workerCredentials": [
+    {
+      "userId": 1,
+      "username": "alice",
+      "passwordHash": "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f"
+    },
+    {
+      "userId": 2,
+      "username": "bob",
+      "passwordHash": "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f"
+    }
+  ],
+  "citizenCredentials": [
+    {
+      "citizenId": 1,
+      "username": "charlie",
+      "passwordHash": "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f"
+    },
+    {
+      "citizenId": 2,
+      "username": "daisy",
+      "passwordHash": "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f"
+    },
+    {
+      "citizenId": 3,
+      "username": "abdul_1234",
+      "passwordHash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+    }
+  ],
+  "notifications": {},
+  "nextUserId": 3,
+  "nextCitizenId": 4,
+  "nextRequestId": 3
+}
