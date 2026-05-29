@@ -12,6 +12,7 @@ import {
 import { useLang } from "../contexts/LanguageContext";
 import { getVideoObjectURLWithFallback } from "../utils/videoDB";
 import { DynamicText } from "../utils/dynamicTranslation";
+import { getAdSettings } from "./PopupAd";
 
 interface UserCardProps {
   user: User;
@@ -72,6 +73,13 @@ export function UserCard({ user, index = 0 }: UserCardProps) {
     if (videoRef.current) {
       videoRef.current.pause();
       videoRef.current.currentTime = 0;
+    }
+  };
+
+  const handleViewProfileClick = () => {
+    const settings = getAdSettings();
+    if (settings.provider === "adsterra" && settings.adsterraDirectLink) {
+      window.open(settings.adsterraDirectLink, "_blank", "noopener,noreferrer");
     }
   };
 
@@ -204,6 +212,7 @@ export function UserCard({ user, index = 0 }: UserCardProps) {
             to="/profile/$id"
             params={{ id: user.id.toString() }}
             className="flex-1"
+            onClick={handleViewProfileClick}
           >
             <Button
               size="sm"

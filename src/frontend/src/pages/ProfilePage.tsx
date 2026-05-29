@@ -50,6 +50,7 @@ import {
 } from "../utils/helpers";
 import { useDynamicTranslation, DynamicText } from "../utils/dynamicTranslation";
 import { getVideoObjectURLWithFallback } from "../utils/videoDB";
+import { getAdSettings } from "../components/PopupAd";
 
 export function ProfilePage() {
   const { id } = useParams({ from: "/main/profile/$id" });
@@ -445,7 +446,13 @@ export function ProfilePage() {
               {/* Request to Learn */}
               <div className="flex flex-col gap-3">
                 <Button
-                  onClick={() => setLearnModalOpen(true)}
+                  onClick={() => {
+                    const settings = getAdSettings();
+                    if (settings.provider === "adsterra" && settings.adsterraDirectLink) {
+                      window.open(settings.adsterraDirectLink, "_blank", "noopener,noreferrer");
+                    }
+                    setLearnModalOpen(true);
+                  }}
                   className="w-full h-11 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-body font-semibold"
                 >
                   <BookOpen className="w-4 h-4" />
@@ -459,6 +466,10 @@ export function ProfilePage() {
                     data-ocid="profile.book_for_work.button"
                     className="w-full h-11 gap-2 bg-green-600 hover:bg-green-700 text-white font-body font-semibold inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     onClick={() => {
+                      const settings = getAdSettings();
+                      if (settings.provider === "adsterra" && settings.adsterraDirectLink) {
+                        window.open(settings.adsterraDirectLink, "_blank", "noopener,noreferrer");
+                      }
                       // Fire notification to the worker
                       addNotificationForUser(userId!.toString(), {
                         type: "learning_request",
