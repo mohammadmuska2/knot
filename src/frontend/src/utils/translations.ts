@@ -391,6 +391,21 @@ export interface Translations {
   footer_role_ceo: string;
   footer_role_research: string;
   footer_role_comms: string;
+  admin_tab_ad_settings?: string;
+  admin_ads_title?: string;
+  admin_ads_provider?: string;
+  admin_ads_provider_fallback?: string;
+  admin_ads_provider_propeller?: string;
+  admin_ads_provider_adsterra?: string;
+  admin_ads_propeller_zone_label?: string;
+  admin_ads_adsterra_popunder_label?: string;
+  admin_ads_adsterra_socialbar_label?: string;
+  admin_ads_adsterra_banner_728_label?: string;
+  admin_ads_adsterra_banner_300_label?: string;
+  admin_ads_adsterra_direct_link_label?: string;
+  admin_ads_save_success?: string;
+  admin_ads_save_btn?: string;
+  admin_ads_hint?: string;
 }
 
 const en: Translations = {
@@ -779,6 +794,21 @@ const en: Translations = {
   footer_role_ceo: "CEO & Founder",
   footer_role_research: "Research & Testing",
   footer_role_comms: "Communication Lead & Testing",
+  admin_tab_ad_settings: "Ad Configuration",
+  admin_ads_title: "Monetization & Ad Settings",
+  admin_ads_provider: "Active Ad Network Provider",
+  admin_ads_provider_fallback: "Demo / Fallback Sponsorship Cards",
+  admin_ads_provider_propeller: "Propeller Ads Network",
+  admin_ads_provider_adsterra: "Adsterra Monetization Network",
+  admin_ads_propeller_zone_label: "Propeller Ads Zone ID",
+  admin_ads_adsterra_popunder_label: "Adsterra Popunder Script Tag or URL",
+  admin_ads_adsterra_socialbar_label: "Adsterra Social Bar / In-Page Push Script Tag or URL",
+  admin_ads_adsterra_banner_728_label: "Adsterra Horizontal Banner (728x90) Key",
+  admin_ads_adsterra_banner_300_label: "Adsterra Card Banner (300x250) Key",
+  admin_ads_adsterra_direct_link_label: "Adsterra Direct Link URL (highly profitable)",
+  admin_ads_save_success: "Ad configuration updated successfully",
+  admin_ads_save_btn: "Save Settings",
+  admin_ads_hint: "Configure your approved Adsterra codes below to start earning. You can paste the direct link or specific ad format scripts you received from your Adsterra dashboard.",
 };
 
 const te: Translations = {

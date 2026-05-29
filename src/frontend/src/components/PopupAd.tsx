@@ -3,21 +3,142 @@ import { ExternalLink, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
-// ── Propeller Ads Configuration ───────────────────────────────────────────────
-//
-// HOW TO EARN REAL REVENUE WITH PROPELLER ADS (works on subdomains like icp0.io!):
-//
-// STEP 1: Sign up at https://publishers.propellerads.com
-// STEP 2: Add your site — it WORKS on icp0.io subdomains (no custom domain required)
-// STEP 3: Create an ad zone → get your Zone ID (a number like "4887601")
-// STEP 4: Replace PROPELLER_ZONE_ID below with your actual Zone ID
-// STEP 5: Set PROPELLER_ADS_ENABLED = true
-//
-// Propeller Ads supports: Display banners, native ads, push notifications, pop-under
-// No top-level domain approval required. Subdomain-friendly.
-//
-const PROPELLER_ADS_ENABLED = import.meta.env.VITE_PROPELLER_ADS_ENABLED === "true";
-const PROPELLER_ZONE_ID = import.meta.env.VITE_PROPELLER_ZONE_ID || "";
+// ── Dynamic Ads & Monetization Settings ───────────────────────────────────────
+export interface AdSettings {
+  provider: "fallback" | "propeller" | "adsterra";
+  propellerZoneId: string;
+  adsterraPopunderUrl: string;
+  adsterraSocialBarUrl: string;
+  adsterraBannerKey728x90: string;
+  adsterraBannerKey300x250: string;
+  adsterraDirectLink: string;
+}
+
+const DEFAULT_AD_SETTINGS: AdSettings = {
+  provider: "adsterra",
+  propellerZoneId: import.meta.env.VITE_PROPELLER_ZONE_ID || "",
+  adsterraPopunderUrl: import.meta.env.VITE_ADSTERRA_POPUNDER_URL || "",
+  adsterraSocialBarUrl: import.meta.env.VITE_ADSTERRA_SOCIAL_BAR_URL || "",
+  adsterraBannerKey728x90: import.meta.env.VITE_ADSTERRA_BANNER_KEY_728X90 || "",
+  adsterraBannerKey300x250: import.meta.env.VITE_ADSTERRA_BANNER_KEY_300X250 || "",
+  adsterraDirectLink: import.meta.env.VITE_ADSTERRA_DIRECT_LINK || "",
+};
+
+export function getAdSettings(): AdSettings {
+  try {
+    const saved = localStorage.getItem("knot_ad_settings");
+    if (saved) {
+      return { ...DEFAULT_AD_SETTINGS, ...JSON.parse(saved) };
+    }
+  } catch (e) {
+    console.error("Failed to parse ad settings", e);
+  }
+  return DEFAULT_AD_SETTINGS;
+}
+
+export function saveAdSettings(settings: AdSettings) {
+  try {
+    localStorage.setItem("knot_ad_settings", JSON.stringify(settings));
+    window.dispatchEvent(new Event("knot_ad_settings_changed"));
+  } catch (e) {
+    console.error("Failed to save ad settings", e);
+  }
+}
+
+// ── Dynamic Script Injection ──────────────────────────────────────────────────
+let propellerScriptInjected = false;
+let adsterraPopunderInjected = false;
+let adsterraSocialBarInjected = false;
+
+export function injectAds() {
+  if (typeof window === "undefined" || typeof document === "undefined") return;
+  const settings = getAdSettings();
+  
+  if (settings.provider === "propeller" && settings.propellerZoneId && !propellerScriptInjected) {
+    propellerScriptInjected = true;
+    const s = document.createElement("script");
+    s.type = "text/javascript";
+    s.async = true;
+    s.src = `//cdn.propellerads.com/zones/${settings.propellerZoneId}.js?t=${Math.floor(Math.random() * 100000)}`;
+    s.setAttribute("data-zone", settings.propellerZoneId);
+    (document.body || document.documentElement).appendChild(s);
+  }
+  
+  if (settings.provider === "adsterra") {
+    if (settings.adsterraPopunderUrl && !adsterraPopunderInjected) {
+      let url = settings.adsterraPopunderUrl.trim();
+      const srcMatch = url.match(/src=["']([^"']+)["']/);
+      if (srcMatch && srcMatch[1]) {
+        url = srcMatch[1];
+      }
+      adsterraPopunderInjected = true;
+      const s = document.createElement("script");
+      s.type = "text/javascript";
+      s.async = true;
+      s.src = url;
+      (document.body || document.documentElement).appendChild(s);
+    }
+    
+    if (settings.adsterraSocialBarUrl && !adsterraSocialBarInjected) {
+      let url = settings.adsterraSocialBarUrl.trim();
+      const srcMatch = url.match(/src=["']([^"']+)["']/);
+      if (srcMatch && srcMatch[1]) {
+        url = srcMatch[1];
+      }
+      adsterraSocialBarInjected = true;
+      const s = document.createElement("script");
+      s.type = "text/javascript";
+      s.async = true;
+      s.src = url;
+      (document.body || document.documentElement).appendChild(s);
+    }
+  }
+}
+
+// ── Adsterra Banner Dynamic Component ──────────────────────────────────────────
+export function AdsterraBanner({ keyId, width, height }: { keyId: string; width: number; height: number }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!keyId || !containerRef.current) return;
+    
+    // Clear any previous script elements
+    containerRef.current.innerHTML = "";
+    
+    const containerId = `at-container-${keyId}`;
+    const innerDiv = document.createElement("div");
+    innerDiv.id = containerId;
+    containerRef.current.appendChild(innerDiv);
+
+    // Global configurations
+    (window as any).atOptions = {
+      key: keyId,
+      format: "iframe",
+      height: height,
+      width: width,
+      params: {},
+    };
+
+    const s = document.createElement("script");
+    s.type = "text/javascript";
+    s.src = `//www.highperformanceformat.com/${keyId}/invoke.js`;
+    containerRef.current.appendChild(s);
+    
+    return () => {
+      try {
+        delete (window as any).atOptions;
+      } catch {}
+    };
+  }, [keyId, width, height]);
+
+  return (
+    <div 
+      ref={containerRef} 
+      className="flex justify-center items-center overflow-hidden mx-auto bg-gray-50/5 dark:bg-slate-950/20 backdrop-blur-sm rounded-xl py-1 shadow-inner border border-white/5"
+      style={{ minHeight: height, minWidth: "100%" }}
+    />
+  );
+}
 
 // ── Fallback / Placeholder Ads (shown when Propeller Ads is not configured) ───
 
@@ -101,29 +222,22 @@ const FALLBACK_ADS: FallbackAd[] = [
   },
 ];
 
-// Inject Propeller Ads script once
-let propellerScriptInjected = false;
-function injectPropellerAds() {
-  if (!PROPELLER_ADS_ENABLED) return;
-  if (propellerScriptInjected) return;
-  if (typeof document === "undefined") return;
-  propellerScriptInjected = true;
-  const s = document.createElement("script");
-  s.type = "text/javascript";
-  s.async = true;
-  s.src = `//cdn.propellerads.com/zones/${PROPELLER_ZONE_ID}.js?t=${Math.floor(Math.random() * 100000)}`;
-  s.setAttribute("data-zone", PROPELLER_ZONE_ID);
-  (document.body || document.documentElement).appendChild(s);
-}
-
-// ── Banner Ad (inline in feed / assessment) ───────────────────────────────────
-
 export function BannerAd({ className = "" }: { className?: string }) {
   const { t } = useLang();
-  const propellerContainerRef = useRef<HTMLDivElement>(null);
-  const [adIndex] = useState(() =>
-    Math.floor(Math.random() * FALLBACK_ADS.length),
-  );
+  const [settings, setSettings] = useState(getAdSettings());
+  const [adIndex] = useState(() => Math.floor(Math.random() * FALLBACK_ADS.length));
+  
+  useEffect(() => {
+    injectAds();
+    const handleChanged = () => {
+      setSettings(getAdSettings());
+    };
+    window.addEventListener("knot_ad_settings_changed", handleChanged);
+    return () => {
+      window.removeEventListener("knot_ad_settings_changed", handleChanged);
+    };
+  }, []);
+
   const baseAd = FALLBACK_ADS[adIndex];
   const ad = {
     ...baseAd,
@@ -133,29 +247,34 @@ export function BannerAd({ className = "" }: { className?: string }) {
     tag: t("ad_sponsored")
   };
 
-  useEffect(() => {
-    injectPropellerAds();
-  }, []);
+  const isPropeller = settings.provider === "propeller";
+  const isAdsterra = settings.provider === "adsterra";
+  const hasAdsterraBanner = isAdsterra && settings.adsterraBannerKey728x90;
+  
+  // High payouts for Direct Link
+  const clickUrl = (isAdsterra && settings.adsterraDirectLink) 
+    ? settings.adsterraDirectLink 
+    : ad.url;
 
   return (
     <div
       className={`rounded-2xl overflow-hidden shadow-md border border-white/10 ${className}`}
       data-ocid="banner_ad.card"
     >
-      {PROPELLER_ADS_ENABLED ? (
-        /* Propeller Ads renders globally — this is a container placeholder */
-        <div
-          ref={propellerContainerRef}
-          className="min-h-[90px] bg-gray-50 flex items-center justify-center"
-        >
+      {isPropeller && settings.propellerZoneId ? (
+        <div className="min-h-[90px] bg-slate-900 flex items-center justify-center">
           <p className="text-gray-400 text-xs font-body">Advertisement</p>
         </div>
+      ) : hasAdsterraBanner ? (
+        <AdsterraBanner keyId={settings.adsterraBannerKey728x90} width={728} height={90} />
       ) : (
         <a
-          href={ad.url}
+          href={clickUrl}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={(e) => e.preventDefault()}
+          onClick={(e) => {
+            if (clickUrl === "#") e.preventDefault();
+          }}
           className="block no-underline"
           data-ocid="banner_ad.link"
         >
@@ -194,10 +313,9 @@ export function BannerAd({ className = "" }: { className?: string }) {
               {ad.cta}
             </div>
           </div>
-          {/* Demo label — only shown until Propeller Ads is configured */}
           <div className="px-3 py-1 bg-black/50 text-center">
             <p className="font-body text-[9px] text-white/40 tracking-wide">
-              {t("ad_demo_banner")}
+              {isAdsterra ? "Adsterra Sponsored Partner Card" : t("ad_demo_banner")}
             </p>
           </div>
         </a>
@@ -210,9 +328,22 @@ export function BannerAd({ className = "" }: { className?: string }) {
 
 export function PopupAd() {
   const { t } = useLang();
+  const [settings, setSettings] = useState(getAdSettings());
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [adIndex] = useState(() => Math.floor(Math.random() * FALLBACK_ADS.length));
+  
+  useEffect(() => {
+    injectAds();
+    const handleChanged = () => {
+      setSettings(getAdSettings());
+    };
+    window.addEventListener("knot_ad_settings_changed", handleChanged);
+    return () => {
+      window.removeEventListener("knot_ad_settings_changed", handleChanged);
+    };
+  }, []);
+
   const baseAd = FALLBACK_ADS[adIndex];
   const ad = {
     ...baseAd,
@@ -221,10 +352,6 @@ export function PopupAd() {
     cta: baseAd.id === "ad_training" ? t("ad_btn") : (baseAd.id === "ad_materials" ? t("ad_materials_cta") : (baseAd.id === "ad_tools" ? t("ad_tools_cta") : (baseAd.id === "ad_insurance" ? t("ad_insurance_cta") : (baseAd.id === "ad_loan" ? t("ad_loan_cta") : baseAd.cta)))),
     tag: t("ad_sponsored")
   };
-
-  useEffect(() => {
-    injectPropellerAds();
-  }, []);
 
   // Show after 8 seconds
   useEffect(() => {
@@ -252,6 +379,15 @@ export function PopupAd() {
     setDismissed(true);
   }
 
+  const isPropeller = settings.provider === "propeller";
+  const isAdsterra = settings.provider === "adsterra";
+  const hasAdsterraBanner300 = isAdsterra && settings.adsterraBannerKey300x250;
+  
+  // High payouts for Direct Link
+  const clickUrl = (isAdsterra && settings.adsterraDirectLink) 
+    ? settings.adsterraDirectLink 
+    : ad.url;
+
   return (
     <AnimatePresence>
       {visible && (
@@ -264,71 +400,98 @@ export function PopupAd() {
           className="fixed bottom-6 right-6 z-50 w-[320px] rounded-2xl overflow-hidden shadow-2xl"
           data-ocid="popup_ad.modal"
         >
-          <div
-            className="rounded-2xl overflow-hidden border border-white/10"
-            style={{ background: ad.bgGradient }}
-          >
-            {/* Header bar */}
-            <div className="flex items-center justify-between px-4 pt-4 pb-2">
-              <span
-                className="text-[9px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-widest"
-                style={{
-                  background: "rgba(255,255,255,0.12)",
-                  color: ad.accentColor,
-                  border: `1px solid ${ad.accentColor}40`,
-                }}
-              >
-                {ad.tag}
-              </span>
-              <button
-                type="button"
-                onClick={handleDismiss}
-                className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
-                data-ocid="popup_ad.close_button"
-              >
-                <X className="w-3.5 h-3.5 text-white/70" />
-              </button>
-            </div>
-
-            {/* Body */}
-            <div className="px-5 pb-5 flex flex-col items-center text-center gap-3">
-              <span className="text-6xl select-none drop-shadow-xl">
-                {ad.emoji}
-              </span>
-              <div>
-                <h3 className="font-display font-bold text-white text-lg mb-1.5">
-                  {ad.title}
-                </h3>
-                <p className="font-body text-white/65 text-sm leading-relaxed">
-                  {ad.description}
-                </p>
+          {hasAdsterraBanner300 ? (
+            <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-slate-950 p-4">
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-[9px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-widest bg-white/10 text-amber-400 border border-amber-400/30">
+                  {ad.tag}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleDismiss}
+                  className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                  data-ocid="popup_ad.close_button"
+                >
+                  <X className="w-3.5 h-3.5 text-white/70" />
+                </button>
               </div>
-              <a
-                href={ad.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleDismiss();
-                }}
-                className="w-full py-3 rounded-xl text-sm font-body font-bold text-center transition-all hover:opacity-90 active:scale-95 flex items-center justify-center gap-1.5"
-                style={{ background: ad.accentColor, color: "#000" }}
-                data-ocid="popup_ad.cta_button"
-              >
-                {ad.cta}
-                <ExternalLink className="w-3.5 h-3.5" />
-              </a>
-              <button
-                type="button"
-                onClick={handleDismiss}
-                className="font-body text-xs text-white/35 hover:text-white/55 transition-colors"
-                data-ocid="popup_ad.dismiss_button"
-              >{t("ad_close")}</button>
-              {!PROPELLER_ADS_ENABLED && (
-                <p className="font-body text-[9px] text-white/25 tracking-wide">{t("ad_demo")}</p>
-              )}
+              <div className="flex justify-center items-center">
+                <AdsterraBanner keyId={settings.adsterraBannerKey300x250} width={300} height={250} />
+              </div>
             </div>
-          </div>
+          ) : (
+            <div
+              className="rounded-2xl overflow-hidden border border-white/10"
+              style={{ background: ad.bgGradient }}
+            >
+              {/* Header bar */}
+              <div className="flex items-center justify-between px-4 pt-4 pb-2">
+                <span
+                  className="text-[9px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-widest"
+                  style={{
+                    background: "rgba(255,255,255,0.12)",
+                    color: ad.accentColor,
+                    border: `1px solid ${ad.accentColor}40`,
+                  }}
+                >
+                  {ad.tag}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleDismiss}
+                  className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                  data-ocid="popup_ad.close_button"
+                >
+                  <X className="w-3.5 h-3.5 text-white/70" />
+                </button>
+              </div>
+
+              {/* Body */}
+              <div className="px-5 pb-5 flex flex-col items-center text-center gap-3">
+                <span className="text-6xl select-none drop-shadow-xl">
+                  {ad.emoji}
+                </span>
+                <div>
+                  <h3 className="font-display font-bold text-white text-lg mb-1.5">
+                    {ad.title}
+                  </h3>
+                  <p className="font-body text-white/65 text-sm leading-relaxed">
+                    {ad.description}
+                  </p>
+                </div>
+                <a
+                  href={clickUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => {
+                    if (clickUrl === "#") {
+                      e.preventDefault();
+                    } else {
+                      handleDismiss();
+                    }
+                  }}
+                  className="w-full py-3 rounded-xl text-sm font-body font-bold text-center transition-all hover:opacity-90 active:scale-95 flex items-center justify-center gap-1.5"
+                  style={{ background: ad.accentColor, color: "#000" }}
+                  data-ocid="popup_ad.cta_button"
+                >
+                  {ad.cta}
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+                <button
+                  type="button"
+                  onClick={handleDismiss}
+                  className="font-body text-xs text-white/35 hover:text-white/55 transition-colors"
+                  data-ocid="popup_ad.dismiss_button"
+                >{t("ad_close")}</button>
+                {settings.provider === "fallback" && (
+                  <p className="font-body text-[9px] text-white/25 tracking-wide">{t("ad_demo")}</p>
+                )}
+                {isAdsterra && (
+                  <p className="font-body text-[9px] text-white/25 tracking-wide">Adsterra Sponsored Partner Card</p>
+                )}
+              </div>
+            </div>
+          )}
         </motion.div>
       )}
     </AnimatePresence>

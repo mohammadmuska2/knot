@@ -38,6 +38,7 @@ import { LANGUAGE_OPTIONS, type LangCode } from "../utils/translations";
 import { getAuthUser } from "../utils/auth";
 import { api } from "../utils/api";
 import { useDynamicTranslation } from "../utils/dynamicTranslation";
+import { getAdSettings, saveAdSettings, type AdSettings } from "../components/PopupAd";
 
 function StatCard({
   icon: Icon,
@@ -99,6 +100,42 @@ export function AdminDashboardPage() {
   const queryClient = useQueryClient();
   const { lang, setLang, t } = useLang();
   const [activeVideo, setActiveVideo] = useState<{ url: string; title: string } | null>(null);
+
+  // Ad Settings State
+  const [adProvider, setAdProvider] = useState<"fallback" | "propeller" | "adsterra">("fallback");
+  const [propellerZoneId, setPropellerZoneId] = useState("");
+  const [adsterraPopunder, setAdsterraPopunder] = useState("");
+  const [adsterraSocialBar, setAdsterraSocialBar] = useState("");
+  const [adsterraBanner728, setAdsterraBanner728] = useState("");
+  const [adsterraBanner300, setAdsterraBanner300] = useState("");
+  const [adsterraDirectLink, setAdsterraDirectLink] = useState("");
+
+  // Load initial settings
+  useEffect(() => {
+    const settings = getAdSettings();
+    setAdProvider(settings.provider);
+    setPropellerZoneId(settings.propellerZoneId);
+    setAdsterraPopunder(settings.adsterraPopunderUrl);
+    setAdsterraSocialBar(settings.adsterraSocialBarUrl);
+    setAdsterraBanner728(settings.adsterraBannerKey728x90);
+    setAdsterraBanner300(settings.adsterraBannerKey300x250);
+    setAdsterraDirectLink(settings.adsterraDirectLink);
+  }, []);
+
+  const handleSaveAdSettings = (e: React.FormEvent) => {
+    e.preventDefault();
+    const updated: AdSettings = {
+      provider: adProvider,
+      propellerZoneId: propellerZoneId.trim(),
+      adsterraPopunderUrl: adsterraPopunder.trim(),
+      adsterraSocialBarUrl: adsterraSocialBar.trim(),
+      adsterraBannerKey728x90: adsterraBanner728.trim(),
+      adsterraBannerKey300x250: adsterraBanner300.trim(),
+      adsterraDirectLink: adsterraDirectLink.trim(),
+    };
+    saveAdSettings(updated);
+    toast.success(t("admin_ads_save_success") || "Ad configuration updated successfully");
+  };
 
   useEffect(() => {
     if (!authUser || authUser.role !== "admin") {
@@ -323,7 +360,7 @@ export function AdminDashboardPage() {
 
           {/* Tabs */}
           <Tabs defaultValue="verifications" className="w-full">
-            <TabsList className="grid grid-cols-2 md:grid-cols-4 bg-muted/50 p-1 rounded-xl h-auto mb-8 border border-border">
+            <TabsList className="grid grid-cols-2 md:grid-cols-5 bg-muted/50 p-1 rounded-xl h-auto mb-8 border border-border">
               <TabsTrigger value="verifications" className="py-3 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all">
                 <Video className="w-4 h-4 mr-2" />
                 {t("admin_practical_approval")} ({practicalSubmissions.length})
@@ -339,6 +376,10 @@ export function AdminDashboardPage() {
               <TabsTrigger value="requests" className="py-3 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all">
                 <FileText className="w-4 h-4 mr-2" />
                 {t("admin_tab_requests") || "Learning Requests"} ({learningRequests.length})
+              </TabsTrigger>
+              <TabsTrigger value="ad-settings" className="py-3 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all">
+                <Globe className="w-4 h-4 mr-2" />
+                {t("admin_tab_ad_settings") || "Ad Configuration"}
               </TabsTrigger>
             </TabsList>
 
@@ -623,6 +664,153 @@ export function AdminDashboardPage() {
                     </TableBody>
                   </Table>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="ad-settings" className="mt-0 animate-fade-in">
+            <Card className="border-border shadow-md bg-card/60 backdrop-blur-md overflow-hidden">
+              <CardHeader className="bg-muted/30 border-b border-border pb-4">
+                <CardTitle className="text-lg flex items-center gap-2 text-foreground font-display font-bold">
+                  <Globe className="w-5 h-5 text-primary" />
+                  {t("admin_ads_title") || "Monetization & Ad Settings"}
+                </CardTitle>
+                <p className="text-xs text-muted-foreground font-body mt-1">
+                  {t("admin_ads_hint") || "Configure your approved Adsterra codes below to start earning. You can paste the direct link or specific ad format scripts you received from your Adsterra dashboard."}
+                </p>
+              </CardHeader>
+              <CardContent className="p-6">
+                <form onSubmit={handleSaveAdSettings} className="space-y-6 max-w-2xl">
+                  {/* Active Ad Network Select */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-semibold text-foreground font-body">
+                      {t("admin_ads_provider") || "Active Ad Network Provider"}
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={adProvider}
+                        onChange={(e) => setAdProvider(e.target.value as any)}
+                        className="w-full h-11 px-3 bg-background border border-border hover:border-primary/50 focus:border-primary focus:ring-1 focus:ring-primary rounded-lg text-sm text-foreground font-body transition-all outline-none appearance-none"
+                      >
+                        <option value="fallback">{t("admin_ads_provider_fallback") || "Demo / Fallback Sponsorship Cards"}</option>
+                        <option value="propeller">{t("admin_ads_provider_propeller") || "Propeller Ads Network"}</option>
+                        <option value="adsterra">{t("admin_ads_provider_adsterra") || "Adsterra Monetization Network"}</option>
+                      </select>
+                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-muted-foreground">
+                        ▼
+                      </div>
+                    </div>
+                  </div>
+
+                  <Separator className="bg-border/60" />
+
+                  {/* Dynamic fields depending on selected provider */}
+                  {adProvider === "propeller" && (
+                    <div className="space-y-2 animate-slide-down">
+                      <label className="block text-sm font-semibold text-foreground font-body">
+                        {t("admin_ads_propeller_zone_label") || "Propeller Ads Zone ID"}
+                      </label>
+                      <input
+                        type="text"
+                        value={propellerZoneId}
+                        onChange={(e) => setPropellerZoneId(e.target.value)}
+                        placeholder="e.g. 4887601"
+                        className="w-full h-11 px-4 bg-background border border-border hover:border-primary/50 focus:border-primary focus:ring-1 focus:ring-primary rounded-lg text-sm text-foreground font-body font-mono transition-all outline-none"
+                      />
+                    </div>
+                  )}
+
+                  {adProvider === "adsterra" && (
+                    <div className="space-y-5 animate-slide-down">
+                      {/* Direct Link */}
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-foreground font-body flex items-center gap-1.5">
+                          <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-500" />
+                          {t("admin_ads_adsterra_direct_link_label") || "Adsterra Direct Link URL (highly profitable)"}
+                        </label>
+                        <input
+                          type="text"
+                          value={adsterraDirectLink}
+                          onChange={(e) => setAdsterraDirectLink(e.target.value)}
+                          placeholder="e.g. https://www.highrateprofit.com/abcdef0123/"
+                          className="w-full h-11 px-4 bg-background border border-border hover:border-primary/50 focus:border-primary focus:ring-1 focus:ring-primary rounded-lg text-sm text-foreground font-body font-mono transition-all outline-none"
+                        />
+                        <p className="text-[10px] text-muted-foreground leading-relaxed font-body">
+                          Tip: We will link all banner card clicks to this direct link. This is one of the highest paying formats on Adsterra.
+                        </p>
+                      </div>
+
+                      {/* Popunder Ad */}
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-foreground font-body">
+                          {t("admin_ads_adsterra_popunder_label") || "Adsterra Popunder Script Tag or URL"}
+                        </label>
+                        <textarea
+                          value={adsterraPopunder}
+                          onChange={(e) => setAdsterraPopunder(e.target.value)}
+                          placeholder="Paste your popunder script tag or source URL here..."
+                          rows={2}
+                          className="w-full p-3 bg-background border border-border hover:border-primary/50 focus:border-primary focus:ring-1 focus:ring-primary rounded-lg text-sm text-foreground font-body font-mono transition-all outline-none resize-none"
+                        />
+                      </div>
+
+                      {/* Social Bar */}
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-foreground font-body">
+                          {t("admin_ads_adsterra_socialbar_label") || "Adsterra Social Bar / In-Page Push Script Tag or URL"}
+                        </label>
+                        <textarea
+                          value={adsterraSocialBar}
+                          onChange={(e) => setAdsterraSocialBar(e.target.value)}
+                          placeholder="Paste your social bar script tag or source URL here..."
+                          rows={2}
+                          className="w-full p-3 bg-background border border-border hover:border-primary/50 focus:border-primary focus:ring-1 focus:ring-primary rounded-lg text-sm text-foreground font-body font-mono transition-all outline-none resize-none"
+                        />
+                      </div>
+
+                      {/* Banner Keys */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label className="block text-sm font-semibold text-foreground font-body">
+                            {t("admin_ads_adsterra_banner_728_label") || "Adsterra Horizontal Banner (728x90) Key"}
+                          </label>
+                          <input
+                            type="text"
+                            value={adsterraBanner728}
+                            onChange={(e) => setAdsterraBanner728(e.target.value)}
+                            placeholder="e.g. e8de9553f1f1d1de41f21db5a507204f"
+                            className="w-full h-11 px-4 bg-background border border-border hover:border-primary/50 focus:border-primary focus:ring-1 focus:ring-primary rounded-lg text-sm text-foreground font-body font-mono transition-all outline-none"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="block text-sm font-semibold text-foreground font-body">
+                            {t("admin_ads_adsterra_banner_300_label") || "Adsterra Card Banner (300x250) Key"}
+                          </label>
+                          <input
+                            type="text"
+                            value={adsterraBanner300}
+                            onChange={(e) => setAdsterraBanner300(e.target.value)}
+                            placeholder="e.g. bcdef0123456789a"
+                            className="w-full h-11 px-4 bg-background border border-border hover:border-primary/50 focus:border-primary focus:ring-1 focus:ring-primary rounded-lg text-sm text-foreground font-body font-mono transition-all outline-none"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <Separator className="bg-border/60 pt-2" />
+
+                  {/* Save Button */}
+                  <div className="pt-2">
+                    <Button 
+                      type="submit" 
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground font-body font-semibold px-6 h-11 rounded-lg transition-all"
+                    >
+                      {t("admin_ads_save_btn") || "Save Settings"}
+                    </Button>
+                  </div>
+                </form>
               </CardContent>
             </Card>
           </TabsContent>
