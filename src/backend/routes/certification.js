@@ -110,12 +110,6 @@ router.post('/approve/:workerId', requireAdmin, (req, res) => {
       });
     }
 
-    // Automatically verify the worker in users array too
-    const user = dbData.users.find(u => u.id === workerId);
-    if (user) {
-      user.verified = true;
-    }
-
     writeDB(dbData);
     res.json({ success: true });
   } catch (err) {
