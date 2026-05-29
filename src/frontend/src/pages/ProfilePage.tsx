@@ -504,45 +504,7 @@ export function ProfilePage() {
                   </Button>
                 )}
 
-                {/* Certification status */}
-                {(() => {
-                  let certData = workerCert;
-                  if (!certData && userId) {
-                    const localCert = localStorage.getItem(
-                      `knot_cert_${userId.toString()}`,
-                    );
-                    if (localCert) {
-                      try {
-                        certData = JSON.parse(localCert) as CertificationResult;
-                      } catch {
-                        /* ignore */
-                      }
-                    }
-                  }
-                  const hasCert = certData?.passed === true;
-                  return hasCert ? (
-                    <Button
-                      variant="outline"
-                      className="w-full h-11 gap-2 font-body font-semibold border-amber-400 text-amber-700 hover:bg-amber-50"
-                      onClick={() => {
-                        localStorage.setItem("knot_view_cert_name", user.name);
-                        localStorage.setItem(
-                          "knot_view_cert_skill",
-                          user.skill,
-                        );
-                        navigate({ to: "/certificate" as any });
-                      }}
-                    >
-                      <Award className="w-4 h-4" />
-                      View Certificate
-                    </Button>
-                  ) : (
-                    <div className="w-full h-11 flex items-center justify-center gap-2 rounded-lg border border-muted bg-muted/40 text-muted-foreground text-sm font-body font-medium">
-                      <Shield className="w-4 h-4" />
-                      {t("cert_not_tested")}
-                    </div>
-                  );
-                })()}
+
               </div>
             </div>
           </div>
@@ -1027,53 +989,7 @@ export function ProfilePage() {
               </Button>
             </div>
 
-            {/* Certification button — always visible */}
-            {(() => {
-              // Check localStorage first (fast/offline), then fall back to query result
-              let certData = workerCert;
-              if (!certData && userId) {
-                const localCert = localStorage.getItem(
-                  `knot_cert_${userId.toString()}`,
-                );
-                if (localCert) {
-                  try {
-                    certData = JSON.parse(localCert) as CertificationResult;
-                  } catch {
-                    // ignore
-                  }
-                }
-              }
-              const hasCert = certData?.passed === true;
-              return (
-                <div className="mt-3">
-                  {hasCert ? (
-                    <Button
-                      className="w-full h-11 gap-2 font-body font-semibold bg-amber-500 hover:bg-amber-600 text-white shadow-md shadow-amber-500/25"
-                      onClick={() => {
-                        localStorage.setItem("knot_view_cert_name", user.name);
-                        localStorage.setItem(
-                          "knot_view_cert_skill",
-                          user.skill,
-                        );
-                        navigate({ to: "/certificate" as any });
-                      }}
-                    >
-                      <Award className="w-4 h-4" />
-                      View Certificate
-                    </Button>
-                  ) : (
-                    <Button
-                      disabled
-                      variant="outline"
-                      className="w-full h-11 gap-2 font-body font-semibold border-muted text-muted-foreground cursor-not-allowed opacity-60"
-                    >
-                      <Shield className="w-4 h-4" />
-                      Not Certified Yet
-                    </Button>
-                  )}
-                </div>
-              );
-            })()}
+
           </div>
         </div>
       </div>

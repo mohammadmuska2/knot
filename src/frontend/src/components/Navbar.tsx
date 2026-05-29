@@ -311,20 +311,7 @@ export function Navbar() {
                     </Button>
                   </Link>
                 )}
-                {authUser.role === "worker" && hasCertPassed && (
-                  <Link to={"/certificate" as any}>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className={`text-white/80 hover:text-white hover:bg-white/10 gap-2 font-body ${
-                        isActive("/certificate") ? "bg-white/15 text-white" : ""
-                      }`}
-                    >
-                      <Award className="w-4 h-4" />
-                      {t("nav_my_certificate")}
-                    </Button>
-                  </Link>
-                )}
+
                 {/* User pill */}
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10">
                   <span className="text-white text-sm font-body font-medium leading-none">
@@ -508,16 +495,7 @@ export function Navbar() {
                       {t("nav_my_dashboard")}
                     </Link>
                   )}
-                  {authUser.role === "worker" && hasCertPassed && (
-                    <Link
-                      to={"/certificate" as any}
-                      onClick={() => setMobileOpen(false)}
-                      className="flex items-center gap-2 px-3 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors font-body"
-                    >
-                      <Award className="w-4 h-4" />
-                      {t("nav_my_certificate")}
-                    </Link>
-                  )}
+
                   <div className="px-3 py-2 border-t border-white/10 mt-1 pt-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
