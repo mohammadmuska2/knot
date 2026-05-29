@@ -9,6 +9,15 @@ function isApproved(db, userId) {
   return db.certificationResults.some(c => c.workerId === userId && c.passed);
 }
 
+function sortUsers(users) {
+  return users.sort((a, b) => {
+    const aVer = a.verified ? 1 : 0;
+    const bVer = b.verified ? 1 : 0;
+    if (bVer !== aVer) return bVer - aVer;
+    return ((b.trustScore * 2) + b.endorsementCount) - ((a.trustScore * 2) + a.endorsementCount);
+  });
+}
+
 // GET /api/users
 router.get('/', (req, res) => {
   try {
@@ -16,8 +25,7 @@ router.get('/', (req, res) => {
     const showAll = req.query.all === 'true';
     let results = db.users;
     if (!showAll) results = results.filter(u => isApproved(db, u.id));
-    results.sort((a, b) => ((b.trustScore * 2) + b.endorsementCount) - ((a.trustScore * 2) + a.endorsementCount));
-    res.json(results);
+    res.json(sortUsers(results));
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -59,7 +67,7 @@ router.get('/search', (req, res) => {
       const qs = q.toLowerCase();
       results = results.filter(u => u.name.toLowerCase().includes(qs) || u.skill.toLowerCase().includes(qs));
     }
-    res.json(results);
+    res.json(sortUsers(results));
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -96,7 +104,7 @@ router.get('/skill/:skill', (req, res) => {
     const db = readDB();
     const skill = req.params.skill.toLowerCase();
     const results = db.users.filter(u => isApproved(db, u.id) && u.skill.toLowerCase() === skill);
-    res.json(results);
+    res.json(sortUsers(results));
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -106,7 +114,7 @@ router.get('/distance/:maxKm', (req, res) => {
     const db = readDB();
     const max = parseFloat(req.params.maxKm);
     const results = db.users.filter(u => isApproved(db, u.id) && u.distance <= max);
-    res.json(results);
+    res.json(sortUsers(results));
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 

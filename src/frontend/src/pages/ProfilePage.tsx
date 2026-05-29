@@ -398,7 +398,7 @@ export function ProfilePage() {
                       {translatedUserName}
                       {user.verified && (
                         <span
-                          className="text-sky-500 hover:text-sky-600 transition-colors shrink-0 animate-fade-in"
+                          className="text-emerald-500 hover:text-emerald-600 transition-colors shrink-0 animate-fade-in"
                           title={t("verified_worker_tooltip" as any) || "Official Verified Worker"}
                         >
                           <svg
@@ -827,7 +827,7 @@ export function ProfilePage() {
                     {translatedUserName}
                     {user.verified && (
                       <span
-                        className="text-sky-500 hover:text-sky-600 transition-colors shrink-0 animate-fade-in"
+                        className="text-emerald-500 hover:text-emerald-600 transition-colors shrink-0 animate-fade-in"
                         title={t("verified_worker_tooltip" as any) || "Official Verified Worker"}
                       >
                         <svg

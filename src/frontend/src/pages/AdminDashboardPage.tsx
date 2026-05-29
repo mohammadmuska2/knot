@@ -521,7 +521,7 @@ export function AdminDashboardPage() {
                               <DynamicText text={w.name} />
                               {w.verified && (
                                 <span
-                                  className="text-sky-500 hover:text-sky-600 transition-colors shrink-0"
+                                  className="text-emerald-500 hover:text-emerald-600 transition-colors shrink-0"
                                   title="Official Verified Worker"
                                 >
                                   <svg
@@ -563,7 +563,7 @@ export function AdminDashboardPage() {
                               variant="outline"
                               className={`h-8 px-2.5 mr-2 font-body font-medium text-xs gap-1.5 transition-all ${
                                 w.verified
-                                  ? "bg-sky-50 border-sky-200 text-sky-700 hover:bg-sky-100 hover:text-sky-800 dark:bg-sky-950/30 dark:border-sky-900/50 dark:text-sky-400"
+                                  ? "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800 dark:bg-emerald-950/30 dark:border-emerald-900/50 dark:text-emerald-400"
                                   : "border-border hover:bg-accent text-muted-foreground hover:text-foreground"
                               }`}
                               onClick={() => handleToggleVerification(w)}
@@ -572,7 +572,7 @@ export function AdminDashboardPage() {
                               <CheckCircle
                                 className={`w-3.5 h-3.5 transition-all ${
                                   w.verified
-                                    ? "fill-sky-500 text-white dark:fill-sky-400 dark:text-sky-950"
+                                    ? "fill-emerald-500 text-white dark:fill-emerald-400 dark:text-emerald-950"
                                     : "text-muted-foreground group-hover:text-foreground"
                                 }`}
                               />
