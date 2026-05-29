@@ -394,8 +394,22 @@ export function ProfilePage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center flex-wrap gap-2 mb-1">
-                    <h1 className="font-display font-bold text-2xl text-foreground leading-tight">
+                    <h1 className="font-display font-bold text-2xl text-foreground leading-tight flex items-center gap-1.5">
                       {translatedUserName}
+                      {user.verified && (
+                        <span
+                          className="text-sky-500 hover:text-sky-600 transition-colors shrink-0 animate-fade-in"
+                          title={t("verified_worker_tooltip" as any) || "Official Verified Worker"}
+                        >
+                          <svg
+                            className="w-5 h-5 fill-current"
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                          </svg>
+                        </span>
+                      )}
                     </h1>
                     {badge && (
                       <span
@@ -847,8 +861,22 @@ export function ProfilePage() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center flex-wrap gap-2 mb-1">
-                  <h1 className="font-display font-bold text-2xl text-foreground leading-tight">
+                  <h1 className="font-display font-bold text-2xl text-foreground leading-tight flex items-center gap-1.5">
                     {translatedUserName}
+                    {user.verified && (
+                      <span
+                        className="text-sky-500 hover:text-sky-600 transition-colors shrink-0 animate-fade-in"
+                        title={t("verified_worker_tooltip" as any) || "Official Verified Worker"}
+                      >
+                        <svg
+                          className="w-5 h-5 fill-current"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                        </svg>
+                      </span>
+                    )}
                   </h1>
                   {badge && (
                     <span

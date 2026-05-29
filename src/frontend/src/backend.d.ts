@@ -35,6 +35,7 @@ export interface User {
     skill: string;
     videoURL: string;
     location: string;
+    verified?: boolean;
 }
 export interface CertificationResult {
     workerId: bigint;

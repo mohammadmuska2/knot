@@ -121,7 +121,8 @@ router.post('/register', (req, res) => {
     const id = db.nextUserId++;
     db.users.push({
       id, name, skill, location, trustScore: 0, endorsementCount: 0, badgeLevel: 'None',
-      distance: distance || 5, bio: bio || '', videoURL: videoURL || '', contact: contact || ''
+      distance: distance || 5, bio: bio || '', videoURL: videoURL || '', contact: contact || '',
+      verified: false
     });
     db.workerCredentials.push({ userId: id, username: username.toLowerCase(), passwordHash });
     writeDB(db);
@@ -140,6 +141,20 @@ router.post('/login', (req, res) => {
     const user = db.users.find(u => u.id === cred.userId);
     const token = signToken({ id: cred.userId, role: 'worker', username: cred.username });
     res.json({ success: true, token, user });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// POST /api/users/:id/verify
+router.post('/:id/verify', requireAdmin, (req, res) => {
+  try {
+    const db = readDB();
+    const id = parseInt(req.params.id, 10);
+    const user = db.users.find(u => u.id === id);
+    if (!user) return res.status(404).json({ error: 'Not found' });
+    const { verified } = req.body;
+    user.verified = !!verified;
+    writeDB(db);
+    res.json({ success: true, user });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 

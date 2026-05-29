@@ -166,10 +166,24 @@ export function UserCard({ user, index = 0 }: UserCardProps) {
       <div className="p-4">
         {/* Name + badge */}
         <div className="flex items-start justify-between gap-2 mb-2">
-          <div className="flex items-center gap-2 min-w-0">
+          <div className="flex items-center gap-1.5 min-w-0">
             <h3 className="font-display font-semibold text-foreground truncate text-base leading-tight">
               <DynamicText text={user.name} />
             </h3>
+            {user.verified && (
+              <span
+                className="text-sky-500 hover:text-sky-600 transition-colors shrink-0 animate-fade-in"
+                title={t("verified_worker_tooltip" as any) || "Official Verified Worker"}
+              >
+                <svg
+                  className="w-4 h-4 fill-current"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                </svg>
+              </span>
+            )}
             {badge && (
               <span
                 className={`inline-flex items-center gap-0.5 text-[10px] font-body font-semibold px-1.5 py-0.5 rounded-full border shrink-0 ${badge.className}`}

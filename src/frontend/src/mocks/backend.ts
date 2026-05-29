@@ -15,6 +15,7 @@ function toActorUser(u: {
   id: number; name: string; skill: string; location: string;
   trustScore: number; endorsementCount: number; badgeLevel: string;
   distance: number; bio: string; videoURL: string; contact: string;
+  verified?: boolean;
 }) {
   return {
     ...u,
@@ -22,6 +23,7 @@ function toActorUser(u: {
     trustScore: BigInt(u.trustScore),
     endorsementCount: BigInt(u.endorsementCount),
     distance: BigInt(u.distance),
+    verified: !!u.verified,
   };
 }
 

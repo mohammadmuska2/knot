@@ -229,6 +229,17 @@ export function AdminDashboardPage() {
     }
   };
 
+  const handleToggleVerification = async (user: any) => {
+    try {
+      const newStatus = !user.verified;
+      await api.toggleUserVerification(Number(user.id), newStatus);
+      toast.success(newStatus ? `${user.name} is now verified!` : `Verification for ${user.name} revoked.`);
+      handleRefresh();
+    } catch (err: any) {
+      toast.error("Failed to toggle verification: " + err.message);
+    }
+  };
+
   const handleDeleteCitizen = async (id: number) => {
     if (confirm("Are you sure you want to delete this citizen? This action is permanent.")) {
       try {
@@ -506,7 +517,23 @@ export function AdminDashboardPage() {
                         <TableRow key={w.id} className="hover:bg-muted/30 transition-colors">
                           <TableCell className="text-muted-foreground font-mono">#{w.id}</TableCell>
                           <TableCell>
-                            <div className="font-medium text-foreground"><DynamicText text={w.name} /></div>
+                            <div className="font-medium text-foreground flex items-center gap-1">
+                              <DynamicText text={w.name} />
+                              {w.verified && (
+                                <span
+                                  className="text-sky-500 hover:text-sky-600 transition-colors shrink-0"
+                                  title="Official Verified Worker"
+                                >
+                                  <svg
+                                    className="w-4 h-4 fill-current"
+                                    viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                                  </svg>
+                                </span>
+                              )}
+                            </div>
                             <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                               <Mail className="w-3 h-3" /> {w.contact || "No contact"}
                             </div>
@@ -531,6 +558,26 @@ export function AdminDashboardPage() {
                             </div>
                           </TableCell>
                           <TableCell className="text-right">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className={`h-8 px-2.5 mr-2 font-body font-medium text-xs gap-1.5 transition-all ${
+                                w.verified
+                                  ? "bg-sky-50 border-sky-200 text-sky-700 hover:bg-sky-100 hover:text-sky-800 dark:bg-sky-950/30 dark:border-sky-900/50 dark:text-sky-400"
+                                  : "border-border hover:bg-accent text-muted-foreground hover:text-foreground"
+                              }`}
+                              onClick={() => handleToggleVerification(w)}
+                              title={w.verified ? "Revoke Verification" : "Verify Worker"}
+                            >
+                              <CheckCircle
+                                className={`w-3.5 h-3.5 transition-all ${
+                                  w.verified
+                                    ? "fill-sky-500 text-white dark:fill-sky-400 dark:text-sky-950"
+                                    : "text-muted-foreground group-hover:text-foreground"
+                                }`}
+                              />
+                              {w.verified ? "Verified" : "Verify"}
+                            </Button>
                             <Button
                               size="sm"
                               variant="destructive"

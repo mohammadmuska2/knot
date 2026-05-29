@@ -70,6 +70,7 @@ export const api = {
   getAdminStats: () => fetchWithAuth(`/admin/stats`),
   clearAllData: () => fetchWithAuth(`/admin/clear`, { method: "POST" }),
   deleteUser: (id: number) => fetchWithAuth(`/users/${id}`, { method: "DELETE" }),
+  toggleUserVerification: (id: number, verified: boolean) => fetchWithAuth(`/users/${id}/verify`, { method: "POST", body: JSON.stringify({ verified }) }),
   deleteCitizen: (id: number) => fetchWithAuth(`/citizens/${id}`, { method: "DELETE" }),
   loginAdmin: (username: string, passwordHash: string) => fetchWithAuth(`/admin/login`, { method: "POST", body: JSON.stringify({ username, passwordHash }) }),
 
