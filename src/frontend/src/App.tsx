@@ -10,6 +10,7 @@ import {
 import { useEffect } from "react";
 import { Footer } from "./components/Footer";
 import { Navbar } from "./components/Navbar";
+import { FloatingStickyAd } from "./components/PopupAd";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { NotificationsProvider } from "./contexts/NotificationsContext";
 import { useActor } from "./hooks/useActor";
@@ -54,6 +55,7 @@ function MainLayout() {
         <Outlet />
       </div>
       {!hideLayout && <Footer />}
+      {!hideLayout && <FloatingStickyAd />}
     </>
   );
 }

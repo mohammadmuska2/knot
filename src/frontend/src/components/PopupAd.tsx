@@ -497,3 +497,93 @@ export function PopupAd() {
     </AnimatePresence>
   );
 }
+
+export function FloatingStickyAd() {
+  const { t } = useLang();
+  const [settings, setSettings] = useState(getAdSettings());
+  const [visible, setVisible] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    const handleChanged = () => {
+      setSettings(getAdSettings());
+    };
+    window.addEventListener("knot_ad_settings_changed", handleChanged);
+    
+    // Auto-refresh ads every 35 seconds to multiply views automatically!
+    const interval = setInterval(() => {
+      setRefreshKey((k) => k + 1);
+    }, 35 * 1000);
+
+    return () => {
+      window.removeEventListener("knot_ad_settings_changed", handleChanged);
+      clearInterval(interval);
+    };
+  }, []);
+
+  if (!visible) return null;
+
+  const isAdsterra = settings.provider === "adsterra";
+  const hasBannerKey = isAdsterra && settings.adsterraBannerKey728x90;
+
+  // If no banner is configured, we can show a sleek micro fallback banner card
+  // that redirects to their direct link to maximize passive clicks!
+  const clickUrl = (isAdsterra && settings.adsterraDirectLink) 
+    ? settings.adsterraDirectLink 
+    : "https://www.amazon.in/tools";
+
+  return (
+    <div className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-md border-t border-border py-1 px-4 shadow-lg flex flex-col md:flex-row items-center justify-between gap-2 max-h-[110px] overflow-hidden animate-slide-up">
+      {/* Micro-label & close button */}
+      <div className="flex items-center justify-between w-full md:w-auto gap-3">
+        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-muted text-muted-foreground uppercase tracking-widest border border-border">
+          {t("ad_sponsored") || "Sponsored"}
+        </span>
+        <button
+          type="button"
+          onClick={() => setVisible(false)}
+          className="text-muted-foreground hover:text-foreground p-1 text-xs font-semibold rounded hover:bg-muted transition-colors md:hidden"
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* Main Banner Container */}
+      <div className="flex-1 flex justify-center items-center w-full overflow-hidden" key={refreshKey}>
+        {hasBannerKey ? (
+          <AdsterraBanner keyId={settings.adsterraBannerKey728x90} width={468} height={60} />
+        ) : (
+          <a
+            href={clickUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 bg-muted/50 hover:bg-muted py-1.5 px-4 rounded-xl max-w-lg w-full transition-colors no-underline border border-border/40"
+          >
+            <span className="text-xl">🛠️</span>
+            <div className="min-w-0 flex-1">
+              <p className="font-display font-bold text-xs text-foreground truncate">
+                Get Certified Craftsman Services Near You
+              </p>
+              <p className="font-body text-[10px] text-muted-foreground truncate leading-none mt-0.5">
+                Connecting trusted carpenters, plumbers, and vocational skills.
+              </p>
+            </div>
+            <span className="shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground text-[10px] font-semibold py-1 px-2.5 rounded-lg transition-colors">
+              Find Services →
+            </span>
+          </a>
+        )}
+      </div>
+
+      {/* Close button for desktop */}
+      <button
+        type="button"
+        onClick={() => setVisible(false)}
+        className="hidden md:flex text-muted-foreground hover:text-foreground p-1.5 text-xs font-semibold rounded hover:bg-muted transition-colors shrink-0"
+        title="Dismiss ad"
+      >
+        ✕ Close Ad
+      </button>
+    </div>
+  );
+}
