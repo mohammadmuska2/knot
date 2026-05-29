@@ -17,8 +17,8 @@ export interface AdSettings {
 const DEFAULT_AD_SETTINGS: AdSettings = {
   provider: "adsterra",
   propellerZoneId: import.meta.env.VITE_PROPELLER_ZONE_ID || "",
-  adsterraPopunderUrl: import.meta.env.VITE_ADSTERRA_POPUNDER_URL || "",
-  adsterraSocialBarUrl: import.meta.env.VITE_ADSTERRA_SOCIAL_BAR_URL || "",
+  adsterraPopunderUrl: "https://pl29569065.effectivecpmnetwork.com/04/19/39/0419399d345a19f16be5844b3e31e5c5.js",
+  adsterraSocialBarUrl: "https://pl29569065.effectivecpmnetwork.com/04/19/39/0419399d345a19f16be5844b3e31e5c5.js",
   adsterraBannerKey728x90: import.meta.env.VITE_ADSTERRA_BANNER_KEY_728X90 || "",
   adsterraBannerKey300x250: import.meta.env.VITE_ADSTERRA_BANNER_KEY_300X250 || "",
   adsterraDirectLink: import.meta.env.VITE_ADSTERRA_DIRECT_LINK || "",
